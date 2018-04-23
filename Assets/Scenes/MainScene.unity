@@ -219,12 +219,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74115e112d1051047b162325f0364aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 10
+  _speed: 6
   _accelerationMod: 2
   _rotateSpeed: 4
+  _accelerationTime: 0.5
   _ricochetTime: 0.3
+  _startTimeBetweenExplosions: 5
+  _explosionRecalcTime: 5
+  _explosionAccelerationTimeMod: 0.9
   _camera: {fileID: 989512327}
   _ship: {fileID: 1518261615}
+  _explosionPrefab: {fileID: 114770378717049698, guid: 87ba8ea8ae9aca14fa154c0e5a0d3ba0,
+    type: 2}
 --- !u!1 &238144021
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,7 +269,6 @@ GameObject:
   m_Component:
   - component: {fileID: 531606976}
   - component: {fileID: 531606979}
-  - component: {fileID: 531606978}
   - component: {fileID: 531606977}
   m_Layer: 0
   m_Name: Cube (1)
@@ -319,18 +324,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &531606978
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 531606975}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &531606979
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -391,7 +384,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.028762972, g: 0.05761004, b: 0.102941155, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -400,7 +393,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 40
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -425,7 +418,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 989512326}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -25}
+  m_LocalPosition: {x: 0, y: 0, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -440,7 +433,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1362912308}
   - component: {fileID: 1362912311}
-  - component: {fileID: 1362912310}
   - component: {fileID: 1362912309}
   m_Layer: 0
   m_Name: Cube
@@ -496,18 +488,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &1362912310
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1362912307}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &1362912311
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -523,7 +503,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1518261615}
-  - component: {fileID: 1518261616}
   m_Layer: 0
   m_Name: Ship
   m_TagString: Untagged
@@ -546,14 +525,3 @@ Transform:
   m_Father: {fileID: 214506925}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1518261616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1518261614}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4136fb938d0976e4abe10c3a8fd0b37d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
