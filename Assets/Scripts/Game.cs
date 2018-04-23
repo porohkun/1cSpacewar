@@ -16,6 +16,8 @@ public class Game : MonoBehaviour
     [SerializeField]
     private float _rotateSpeed = 1f;
     [SerializeField]
+    private float _accelerationTime = 0.5f;
+    [SerializeField]
     private float _ricochetTime = 0.3f;
     [SerializeField]
     private CameraHandler _camera;
@@ -24,10 +26,9 @@ public class Game : MonoBehaviour
 
     private Vector2 _direction = Vector2.up;
     private Vector2 _course = Vector2.up;
-    private bool _acceleration = false;
-    private bool _ricochet { get { return _ricochetElapsedTime > 0f; } }
+    private ValueKeeper _acceleration = new ValueKeeper();
+    private ValueKeeper _ricochet = new ValueKeeper();
     private Rect _field;
-    float _ricochetElapsedTime;
 
     private void Start()
     {
@@ -36,6 +37,7 @@ public class Game : MonoBehaviour
 
     private void Update()
     {
+        ValueKeepersUpdate();
         ShipMovement();
         RicochetChecking();
 
@@ -43,12 +45,24 @@ public class Game : MonoBehaviour
         Debug.DrawRay(_ship.position, _direction * 5f, Color.green);
     }
 
+    private void ValueKeepersUpdate()
+    {
+        _acceleration.MinTime = _accelerationTime;
+        _acceleration.Update(Time.deltaTime);
+        _ricochet.MinTime = _ricochetTime;
+        _ricochet.Update(Time.deltaTime);
+    }
+
     private void ShipMovement()
     {
         var mousePos = _camera.ScreenToFrustumPoint(Input.mousePosition);
         _course = (mousePos - _ship.position).normalized;
 
-        _acceleration = Input.GetMouseButton(0);
+        if (Input.GetMouseButton(0))
+            _acceleration.Start();
+        else
+            _acceleration.Stop();
+
         if (_acceleration)
             _direction = Vector3.RotateTowards(_direction, _course, _rotateSpeed * Time.deltaTime, 0f);
 
@@ -61,13 +75,12 @@ public class Game : MonoBehaviour
         if (_ship.position.x > _field.xMax || _ship.position.x < _field.xMin)
         {
             _direction.Scale(HorizontalMirror);
-            _ricochetElapsedTime = _ricochetTime;
+            _ricochet.Start();
         }
         if (_ship.position.y > _field.yMax || _ship.position.y < _field.yMin)
         {
             _direction.Scale(VerticalMirror);
-            _ricochetElapsedTime = _ricochetTime;
+            _ricochet.Start();
         }
-        _ricochetElapsedTime -= Time.deltaTime;
     }
 }
