@@ -19,13 +19,16 @@ public class Explosion : MonoBehaviour
     [SerializeField]
     private float _explodeSpeed = 15f;
 
-    public bool IsSafe { get { return _elapsedTime < _safeTime; } }
+    public bool IsSafe { get { return !gameObject.activeSelf || _elapsedTime < _safeTime; } }
 
     private float _diameter;
     private float _elapsedTime;
 
-    public void Begin()
+    public void Begin(Vector3 position)
     {
+        transform.position = position;
+        gameObject.SetActive(true);
+        enabled = true;
         _elapsedTime = 0f;
         _diameter = 0f;
         UpdateVisual();
@@ -45,5 +48,10 @@ public class Explosion : MonoBehaviour
     {
         _renderer.material = _elapsedTime < _safeTime ? _safeExplosionMaterial : _dangerExplosionMaterial;
         transform.localScale = Vector3.one * _diameter;
+    }
+
+    public bool Contains(Vector3 position)
+    {
+        return Vector3.Distance(position, transform.position) < _diameter / 2f;
     }
 }

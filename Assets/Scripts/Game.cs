@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+
 public class Game : MonoBehaviour
 {
     static readonly Vector2 HorizontalMirror = new Vector2(-1f, 1f);
@@ -31,6 +32,9 @@ public class Game : MonoBehaviour
     [SerializeField]
     private Explosion _explosionPrefab;
 
+    public float GameTime { get { return _gameTime; } }
+    public event System.Action GameOvered;
+
     private Vector2 _direction = Vector2.up;
     private Vector2 _course = Vector2.up;
     private ValueKeeper _acceleration = new ValueKeeper();
@@ -39,6 +43,7 @@ public class Game : MonoBehaviour
     private float _gameTime;
     private float _timeBetweenExplosions = 5f;
     private List<Explosion> _explosions = new List<Explosion>();
+    private bool _shipAlive = true;
 
     private void Start()
     {
@@ -48,7 +53,13 @@ public class Game : MonoBehaviour
 
     public void StartGame()
     {
+        _ship.position = Vector3.zero;
+        _direction = Vector2.up;
+        _course = Vector2.up;
+        _gameTime = 0f;
         _timeBetweenExplosions = _startTimeBetweenExplosions;
+        _explosions.ForEach(e => e.gameObject.SetActive(false));
+        _shipAlive = true;
         StartCoroutine(ExplosionAccelerationRoutine());
         StartCoroutine(ExplosionCreationRoutine());
     }
@@ -67,9 +78,7 @@ public class Game : MonoBehaviour
         while (true)
         {
             Explosion expl = GetExplosion();
-            expl.gameObject.SetActive(true);
-            expl.Begin();
-            expl.transform.position = new Vector2(Random.Range(_field.xMin, _field.xMax), Random.Range(_field.yMin, _field.yMax));
+            expl.Begin(new Vector2(Random.Range(_field.xMin, _field.xMax), Random.Range(_field.yMin, _field.yMax)));
             yield return new WaitForSeconds(_timeBetweenExplosions);
         }
     }
@@ -87,10 +96,14 @@ public class Game : MonoBehaviour
 
     private void Update()
     {
-        _gameTime += Time.deltaTime;
-        ValueKeepersUpdate();
-        ShipMovement();
-        RicochetChecking();
+        if (_shipAlive)
+        {
+            _gameTime += Time.deltaTime;
+            ValueKeepersUpdate();
+            ShipMovement();
+            RicochetChecking();
+            CheckDeath();
+        }
 
         Debug.DrawRay(_ship.position, _course * 50f, Color.red);
         Debug.DrawRay(_ship.position, _direction * 5f, Color.green);
@@ -133,5 +146,19 @@ public class Game : MonoBehaviour
             _direction.Scale(VerticalMirror);
             _ricochet.Start();
         }
+    }
+
+    private void CheckDeath()
+    {
+        foreach (var explosion in _explosions.Where(e => !e.IsSafe))
+            if (explosion.Contains(_ship.position))
+            {
+                _shipAlive = false;
+                StopAllCoroutines();
+                _explosions.ForEach(e => e.enabled = false);
+                if (GameOvered != null)
+                    GameOvered();
+                break;
+            }
     }
 }
