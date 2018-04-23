@@ -53,6 +53,7 @@ public class Game : MonoBehaviour
 
     public void StartGame()
     {
+        _ship.gameObject.SetActive(true);
         _ship.position = Vector3.zero;
         _direction = Vector2.up;
         _course = Vector2.up;
@@ -154,6 +155,7 @@ public class Game : MonoBehaviour
             if (explosion.Contains(_ship.position))
             {
                 _shipAlive = false;
+                _ship.gameObject.SetActive(false);
                 StopAllCoroutines();
                 _explosions.ForEach(e => e.enabled = false);
                 if (GameOvered != null)
