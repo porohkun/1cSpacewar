@@ -24,15 +24,16 @@ public class Game : MonoBehaviour
     {
         var mousePos = _camera.ScreenToFrustumPoint(Input.mousePosition);
         _course = (mousePos - _ship.position).normalized;
-        _direction = Vector3.RotateTowards(_direction, _course, _rotateSpeed * Time.deltaTime, 0f);
+
+        _acceleration = Input.GetMouseButton(0);
+        if (_acceleration)
+            _direction = Vector3.RotateTowards(_direction, _course, _rotateSpeed * Time.deltaTime, 0f);
+
+        _ship.rotation = Quaternion.LookRotation(_direction, Vector3.forward);
+        _ship.position += (Vector3)(_direction * _speed * Time.deltaTime * (_acceleration ? _accelerationMod : 1f));
+
 
         Debug.DrawLine(_ship.position, mousePos, Color.red);
         Debug.DrawRay(_ship.position, _direction * 5f, Color.green);
-
-        _ship.rotation = Quaternion.LookRotation(_direction, Vector3.forward);
-        _ship.position += (Vector3)(_direction * _speed * Time.deltaTime * (_acceleration ? 1f : _accelerationMod));
-
-
-        //transform.position = mousePos;
     }
 }

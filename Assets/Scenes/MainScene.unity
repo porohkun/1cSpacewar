@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74115e112d1051047b162325f0364aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 0
+  _speed: 2
   _accelerationMod: 2
   _rotateSpeed: 1
   _camera: {fileID: 989512327}
