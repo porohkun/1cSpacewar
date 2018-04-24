@@ -14,6 +14,8 @@ public class Game : MonoBehaviour
     [SerializeField]
     private float _accelerationMod = 2f;
     [SerializeField]
+    private float _accelerationPow = 1f;
+    [SerializeField]
     private float _rotateSpeed = 1f;
     [SerializeField]
     private float _accelerationTime = 0.5f;
@@ -31,11 +33,14 @@ public class Game : MonoBehaviour
     private Transform _ship;
     [SerializeField]
     private Explosion _explosionPrefab;
+    [SerializeField]
+    private bool _generateExplosions = true;
 
     public float GameTime { get { return _gameTime; } }
     public event System.Action GameOvered;
 
     private Vector2 _direction = Vector2.up;
+    private Vector2 _flyDirection = Vector2.up;
     private Vector2 _course = Vector2.up;
     private ValueKeeper _acceleration = new ValueKeeper();
     private ValueKeeper _ricochet = new ValueKeeper();
@@ -78,8 +83,11 @@ public class Game : MonoBehaviour
     {
         while (true)
         {
-            Explosion expl = GetExplosion();
-            expl.Begin(new Vector2(Random.Range(_field.xMin, _field.xMax), Random.Range(_field.yMin, _field.yMax)));
+            if (_generateExplosions)
+            {
+                Explosion expl = GetExplosion();
+                expl.Begin(new Vector2(Random.Range(_field.xMin, _field.xMax), Random.Range(_field.yMin, _field.yMax)));
+            }
             yield return new WaitForSeconds(_timeBetweenExplosions);
         }
     }
@@ -108,6 +116,7 @@ public class Game : MonoBehaviour
 
         Debug.DrawRay(_ship.position, _course * 50f, Color.red);
         Debug.DrawRay(_ship.position, _direction * 5f, Color.green);
+        Debug.DrawRay(_ship.position, _flyDirection * 5f, Color.blue);
     }
 
     private void ValueKeepersUpdate()
@@ -131,8 +140,10 @@ public class Game : MonoBehaviour
         if (_acceleration)
             _direction = Vector3.RotateTowards(_direction, _course, _rotateSpeed * Time.deltaTime, 0f);
 
+        _flyDirection = (_flyDirection + _direction * _accelerationPow * Time.deltaTime).normalized;
+
         _ship.rotation = Quaternion.LookRotation(_direction, Vector3.forward);
-        _ship.position += (Vector3)(_direction * _speed * Time.deltaTime * (_acceleration || _ricochet ? _accelerationMod : 1f));
+        _ship.position += (Vector3)(_flyDirection * _speed * Time.deltaTime * (_acceleration || _ricochet ? _accelerationMod : 1f));
     }
 
     private void RicochetChecking()
@@ -140,11 +151,13 @@ public class Game : MonoBehaviour
         if (_ship.position.x > _field.xMax || _ship.position.x < _field.xMin)
         {
             _direction.Scale(HorizontalMirror);
+            _flyDirection.Scale(HorizontalMirror);
             _ricochet.Start();
         }
         if (_ship.position.y > _field.yMax || _ship.position.y < _field.yMin)
         {
             _direction.Scale(VerticalMirror);
+            _flyDirection.Scale(VerticalMirror);
             _ricochet.Start();
         }
     }

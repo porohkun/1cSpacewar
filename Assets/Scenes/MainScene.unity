@@ -221,6 +221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 6
   _accelerationMod: 2
+  _accelerationPow: 1.5
   _rotateSpeed: 4
   _accelerationTime: 0.5
   _ricochetTime: 0.3
@@ -231,6 +232,7 @@ MonoBehaviour:
   _ship: {fileID: 1518261615}
   _explosionPrefab: {fileID: 114770378717049698, guid: 87ba8ea8ae9aca14fa154c0e5a0d3ba0,
     type: 2}
+  _generateExplosions: 1
 --- !u!1 &238144021
 GameObject:
   m_ObjectHideFlags: 0
