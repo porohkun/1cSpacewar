@@ -222,7 +222,7 @@ MonoBehaviour:
   _speed: 6
   _accelerationMod: 2
   _accelerationPow: 1.5
-  _rotateSpeed: 4
+  _rotateSpeed: 2
   _accelerationTime: 0.5
   _ricochetTime: 0.3
   _startTimeBetweenExplosions: 5

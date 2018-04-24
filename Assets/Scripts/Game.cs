@@ -61,6 +61,7 @@ public class Game : MonoBehaviour
         _ship.gameObject.SetActive(true);
         _ship.position = Vector3.zero;
         _direction = Vector2.up;
+        _flyDirection = Vector2.up;
         _course = Vector2.up;
         _gameTime = 0f;
         _timeBetweenExplosions = _startTimeBetweenExplosions;
@@ -116,7 +117,7 @@ public class Game : MonoBehaviour
 
         Debug.DrawRay(_ship.position, _course * 50f, Color.red);
         Debug.DrawRay(_ship.position, _direction * 5f, Color.green);
-        Debug.DrawRay(_ship.position, _flyDirection * 5f, Color.blue);
+        Debug.DrawRay(_ship.position, _flyDirection / _speed * 5f, Color.blue);
     }
 
     private void ValueKeepersUpdate()
@@ -140,10 +141,14 @@ public class Game : MonoBehaviour
         if (_acceleration)
             _direction = Vector3.RotateTowards(_direction, _course, _rotateSpeed * Time.deltaTime, 0f);
 
-        _flyDirection = (_flyDirection + _direction * _accelerationPow * Time.deltaTime).normalized;
+        var seedMod = _acceleration || _ricochet ? _accelerationMod : 1f;
+
+        _flyDirection += _direction * _speed * seedMod * Time.deltaTime;
+        if (_flyDirection.magnitude > _speed * seedMod)
+            _flyDirection -= _flyDirection.normalized * _speed * _accelerationMod * Time.deltaTime;
 
         _ship.rotation = Quaternion.LookRotation(_direction, Vector3.forward);
-        _ship.position += (Vector3)(_flyDirection * _speed * Time.deltaTime * (_acceleration || _ricochet ? _accelerationMod : 1f));
+        _ship.position += (Vector3)(_flyDirection * Time.deltaTime);
     }
 
     private void RicochetChecking()
