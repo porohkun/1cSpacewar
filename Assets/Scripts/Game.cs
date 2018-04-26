@@ -22,21 +22,13 @@ public class Game : MonoBehaviour
     [SerializeField]
     private float _ricochetTime = 0.3f;
     [SerializeField]
-    private float _startTimeBetweenExplosions = 5f;
-    [SerializeField]
-    private float _explosionRecalcTime = 5f;
-    [SerializeField]
-    private float _explosionAccelerationTimeMod = 0.9f;
-    [SerializeField]
     private CameraHandler _camera;
     [SerializeField]
     private Transform _ship;
     [SerializeField]
-    private Explosion _explosionPrefab;
-    [SerializeField]
-    private bool _generateExplosions = true;
+    private ExplosionFactory _explosionFactory;
 
-    public float GameTime { get { return _gameTime; } }
+    public float GameTime { get; private set; }
     public event System.Action GameOvered;
 
     private Vector2 _direction = Vector2.up;
@@ -45,14 +37,12 @@ public class Game : MonoBehaviour
     private ValueKeeper _acceleration = new ValueKeeper();
     private ValueKeeper _ricochet = new ValueKeeper();
     private Rect _field;
-    private float _gameTime;
-    private float _timeBetweenExplosions = 5f;
-    private List<Explosion> _explosions = new List<Explosion>();
     private bool _shipAlive = true;
 
     private void Start()
     {
         _field = _camera.GetFrustumRect();
+        _explosionFactory.Init(_field);
         StartGame();
     }
 
@@ -63,52 +53,16 @@ public class Game : MonoBehaviour
         _direction = Vector2.up;
         _flyDirection = Vector2.up;
         _course = Vector2.up;
-        _gameTime = 0f;
-        _timeBetweenExplosions = _startTimeBetweenExplosions;
-        _explosions.ForEach(e => e.gameObject.SetActive(false));
+        GameTime = 0f;
         _shipAlive = true;
-        StartCoroutine(ExplosionAccelerationRoutine());
-        StartCoroutine(ExplosionCreationRoutine());
-    }
-
-    private IEnumerator ExplosionAccelerationRoutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(_explosionRecalcTime);
-            _timeBetweenExplosions *= _explosionAccelerationTimeMod;
-        }
-    }
-
-    private IEnumerator ExplosionCreationRoutine()
-    {
-        while (true)
-        {
-            if (_generateExplosions)
-            {
-                Explosion expl = GetExplosion();
-                expl.Begin(new Vector2(Random.Range(_field.xMin, _field.xMax), Random.Range(_field.yMin, _field.yMax)));
-            }
-            yield return new WaitForSeconds(_timeBetweenExplosions);
-        }
-    }
-
-    private Explosion GetExplosion()
-    {
-        Explosion explosion = _explosions.FirstOrDefault(e => !e.gameObject.activeSelf);
-        if (explosion == null)
-        {
-            explosion = Instantiate(_explosionPrefab, transform);
-            _explosions.Add(explosion);
-        }
-        return explosion;
+        _explosionFactory.Begin();
     }
 
     private void Update()
     {
         if (_shipAlive)
         {
-            _gameTime += Time.deltaTime;
+            GameTime += Time.deltaTime;
             ValueKeepersUpdate();
             ShipMovement();
             RicochetChecking();
@@ -169,16 +123,13 @@ public class Game : MonoBehaviour
 
     private void CheckDeath()
     {
-        foreach (var explosion in _explosions.Where(e => !e.IsSafe))
-            if (explosion.Contains(_ship.position))
-            {
-                _shipAlive = false;
-                _ship.gameObject.SetActive(false);
-                StopAllCoroutines();
-                _explosions.ForEach(e => e.enabled = false);
-                if (GameOvered != null)
-                    GameOvered();
-                break;
-            }
+        if (_explosionFactory.CheckIntersect(_ship.position))
+        {
+            _shipAlive = false;
+            _ship.gameObject.SetActive(false);
+            _explosionFactory.Stop();
+            if (GameOvered != null)
+                GameOvered();
+        }
     }
 }
